@@ -33,22 +33,31 @@ object ScalatraContribBuild extends Build {
       scalatraTest, scalatraScalatest, scalatraSpecs, scalatraSpecs2,
       scalatraExample, scalatraAkka, scalatraDocs)
 */
-    aggregate = Seq(commonUtilites)
+    aggregate = Seq(commonUtilites, validations)
   )
 
   lazy val commonUtilites = Project(
     id = "contrib-commons",
     base = file("commons"),
     settings = scalatraContribSettings ++ Seq(
-      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, slf4jSimple % "test", specs2(sv) % "test")),
+      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test")),
       description := "Common utilities for contrib modules"
     )
   ) // dependsOn(Seq(scalatraSpecs2, scalatraSpecs, scalatraScalatest) map { _ % "test->compile" } :_*)
 
+  lazy val validations = Project(
+    id = "contrib-validation",
+    base = file("validations"),
+    settings = scalatraContribSettings ++ Seq(
+      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test", scalatraModule("scalatra-specs2") % "test")),
+      description := "Validation module"
+    )
+  ) dependsOn(commonUtilites)
+
   object Dependencies {
 
     def scalatraModule(moduleName: String) = {
-	    "org.scalatra" %% moduleName %	scalatraVersion
+	    "org.scalatra" % moduleName %	scalatraVersion
     }
 
     def grizzledSlf4j(scalaVersion: String) = {
@@ -90,6 +99,8 @@ object ScalatraContribBuild extends Build {
     val servletApi = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided"
 
     val slf4jSimple = "org.slf4j" % "slf4j-simple" % "1.6.4"
+
+    val scalaz = "org.scalaz" %% "scalaz-core" % "6.0.4"
 
   }
 

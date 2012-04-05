@@ -13,9 +13,7 @@ trait ScalatraParamsImplicits {
   self: DefaultImplicitConversions =>
 
   type ParamsType = MultiMapHeadView[String, String] with MapWithIndifferentAccess[String]
-
   type MultiParamsType = MultiMap
-
 
   sealed class TypedParams(params: ParamsType) {
 
@@ -40,4 +38,4 @@ trait ScalatraParamsImplicits {
   implicit def toTypedMultiParams(params: MultiParamsType) = new TypedMultiParams(params)
 }
 
-object Params extends ScalatraParamsImplicits with DefaultImplicitConversions
+object ScalatraParamsImplicits extends ScalatraParamsImplicits with DefaultImplicitConversions

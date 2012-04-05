@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat
 
 class ParamsExtensionSpec extends Specification {
 
-  import Params._
+  import ScalatraParamsImplicits._
 
   case class FakeParams(params: Map[String, String]) extends MultiMapHeadView[String, String]
 
