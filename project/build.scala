@@ -4,6 +4,7 @@ import scala.xml._
 import java.net.URL
 
 object ScalatraContribBuild extends Build {
+
   import Dependencies._
   import Resolvers._
 
@@ -13,7 +14,9 @@ object ScalatraContribBuild extends Build {
     organization := "org.scalatra",
     version := "1.0.0-SNAPSHOT",
     crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.8.2", "2.8.1"),
-    scalaVersion <<= (crossScalaVersions) { versions => versions.head },
+    scalaVersion <<= (crossScalaVersions) {
+      versions => versions.head
+    },
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     manifestSetting,
     publishSetting,
@@ -23,16 +26,7 @@ object ScalatraContribBuild extends Build {
   lazy val scalatraContribProject = Project(
     id = "scalatra-contrib",
     base = file("."),
-    settings = scalatraContribSettings ++ Unidoc.settings ++ doNotPublish ++ Seq(
-      description := "Scalatra contributed extensions" /*,
-      (name in Posterous) := "scalatra-contrib" */
-    ),
-/*
-    aggregate = Seq(scalatraCore, scalatraAuth, scalatraFileupload,
-      scalatraScalate, scalatraSocketio, scalatraLiftJson, scalatraAntiXml,
-      scalatraTest, scalatraScalatest, scalatraSpecs, scalatraSpecs2,
-      scalatraExample, scalatraAkka, scalatraDocs)
-*/
+    settings = scalatraContribSettings ++ Unidoc.settings,
     aggregate = Seq(commonUtilites, validations)
   )
 
@@ -43,26 +37,31 @@ object ScalatraContribBuild extends Build {
       libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test")),
       description := "Common utilities for contrib modules"
     )
-  ) // dependsOn(Seq(scalatraSpecs2, scalatraSpecs, scalatraScalatest) map { _ % "test->compile" } :_*)
+  )
 
   lazy val validations = Project(
     id = "contrib-validation",
     base = file("validations"),
     settings = scalatraContribSettings ++ Seq(
       libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test", scalatraModule("scalatra-specs2") % "test")),
-      description := "Validation module"
+      description := "Validation module",
+      ivyXML := <dependencies>
+        <dependency org="org.eclipse.jetty" name="test-jetty-servlet" rev="8.1.3.v20120416">
+            <exclude org="org.eclipse.jetty.orbit"/>
+        </dependency>
+      </dependencies>
     )
-  ) dependsOn(commonUtilites)
+  ) dependsOn (commonUtilites)
 
   object Dependencies {
 
     def scalatraModule(moduleName: String) = {
-	    "org.scalatra" % moduleName %	scalatraVersion
+      "org.scalatra" % moduleName % scalatraVersion
     }
 
     def grizzledSlf4j(scalaVersion: String) = {
       // Temporary hack pending 2.8.2 release of slf4s.
-      val artifactId = "grizzled-slf4j_"+(scalaVersion match {
+      val artifactId = "grizzled-slf4j_" + (scalaVersion match {
         case "2.8.2" => "2.8.1"
         case v => v
       })
@@ -125,11 +124,12 @@ object ScalatraContribBuild extends Build {
       )
   }
 
-  lazy val publishSetting = publishTo <<= (version) { version: String =>
-    if (version.trim.endsWith("SNAPSHOT"))
-      Some(sonatypeNexusSnapshots)
-    else
-      Some(sonatypeNexusStaging)
+  lazy val publishSetting = publishTo <<= (version) {
+    version: String =>
+      if (version.trim.endsWith("SNAPSHOT"))
+        Some(sonatypeNexusSnapshots)
+      else
+        Some(sonatypeNexusStaging)
   }
 
   // Things we care about primarily because Maven Central demands them
@@ -137,44 +137,46 @@ object ScalatraContribBuild extends Build {
     homepage := Some(new URL("http://www.scalatra.org/")),
     startYear := Some(2009),
     licenses := Seq(("BSD", new URL("http://github.com/scalatra/scalatra/raw/HEAD/LICENSE"))),
-    pomExtra <<= (pomExtra, name, description) {(pom, name, desc) => pom ++ Group(
-      <scm>
-        <url>http://github.com/scalatra/scalatra</url>
-        <connection>scm:git:git://github.com/scalatra/scalatra.git</connection>
-      </scm>
-      <developers>
-        <developer>
-          <id>riffraff</id>
-          <name>Gabriele Renzi</name>
-          <url>http://www.riffraff.info</url>
-        </developer>
-        <developer>
-          <id>alandipert</id>
-          <name>Alan Dipert</name>
-          <url>http://alan.dipert.org</url>
-        </developer>
-        <developer>
-          <id>rossabaker</id>
-          <name>Ross A. Baker</name>
-          <url>http://www.rossabaker.com/</url>
-        </developer>
-        <developer>
-          <id>chirino</id>
-          <name>Hiram Chirino</name>
-          <url>http://hiramchirino.com/blog/</url>
-        </developer>
-        <developer>
-          <id>casualjim</id>
-          <name>Ivan Porto Carrero</name>
-          <url>http://flanders.co.nz/</url>
-        </developer>
-        <developer>
-          <id>jlarmstrong</id>
-          <name>Jared Armstrong</name>
-          <url>http://www.jaredarmstrong.name/</url>
-        </developer>
-      </developers>
-    )}
+    pomExtra <<= (pomExtra, name, description) {
+      (pom, name, desc) => pom ++ Group(
+        <scm>
+          <url>http://github.com/scalatra/scalatra</url>
+          <connection>scm:git:git://github.com/scalatra/scalatra.git</connection>
+        </scm>
+          <developers>
+            <developer>
+              <id>riffraff</id>
+              <name>Gabriele Renzi</name>
+              <url>http://www.riffraff.info</url>
+            </developer>
+            <developer>
+              <id>alandipert</id>
+              <name>Alan Dipert</name>
+              <url>http://alan.dipert.org</url>
+            </developer>
+            <developer>
+              <id>rossabaker</id>
+              <name>Ross A. Baker</name>
+              <url>http://www.rossabaker.com/</url>
+            </developer>
+            <developer>
+              <id>chirino</id>
+              <name>Hiram Chirino</name>
+              <url>http://hiramchirino.com/blog/</url>
+            </developer>
+            <developer>
+              <id>casualjim</id>
+              <name>Ivan Porto Carrero</name>
+              <url>http://flanders.co.nz/</url>
+            </developer>
+            <developer>
+              <id>jlarmstrong</id>
+              <name>Jared Armstrong</name>
+              <url>http://www.jaredarmstrong.name/</url>
+            </developer>
+          </developers>
+      )
+    }
   )
 
   lazy val doNotPublish = Seq(publish := {}, publishLocal := {})
