@@ -26,14 +26,11 @@ trait CommandSupport {
    * a request attribute.
    */
   def command[T <: Command : Manifest]: T = {
-    commandOption[T] match {
-      case None => {
-        val newCommand = manifest[T].erasure.asInstanceOf[Class[T]].newInstance()
-        newCommand.doBinding(params)
-        requestProxy.update(commandRequestKey[T], newCommand)
-        newCommand
-      }
-      case Some(form) => form
+    commandOption[T].getOrElse {
+      val newCommand = manifest[T].erasure.newInstance.asInstanceOf[T]
+      newCommand.doBinding(params)
+      requestProxy.update(commandRequestKey[T], newCommand)
+      newCommand
     }
   }
 

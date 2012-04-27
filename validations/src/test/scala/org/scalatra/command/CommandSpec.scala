@@ -105,15 +105,16 @@ class CommandSpec extends Specification {
 
 import org.scalatra.test.specs2._
 
-class CommandSupportSpec extends Specification {
 
-  class CommandSample extends Command {
-    var binded = false
+class CommandSample extends Command {
+  var binded = false
 
-    afterBinding {
-      binded = true
-    }
+  afterBinding {
+    binded = true
   }
+}
+
+class CommandSupportSpec extends Specification {
 
   class ScalatraPage extends ScalatraFilter with CommandSupport
 
