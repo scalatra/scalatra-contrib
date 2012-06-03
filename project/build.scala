@@ -34,7 +34,7 @@ object ScalatraContribBuild extends Build {
     id = "contrib-commons",
     base = file("commons"),
     settings = scalatraContribSettings ++ Seq(
-      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalatraModule("scalatra-lift-json"), scalaz, slf4jSimple % "test", specs2(sv) % "test")),
+      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalatraModule("scalatra-lift-json"), scalaz, slf4jSimple % "test", scalatraModule("scalatra-specs2") % "test")),
       description := "Common utilities for contrib modules"
     )
   )

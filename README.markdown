@@ -7,7 +7,34 @@ If you're new to Scalatra, check out [The Scalatra Book](http://www.scalatra.org
 
 # Contribs
 
-## Params
+## Typed Params Support
+
+`TypedParamSupport` trait will enrich both the Scalatra' `params` and `multiParams` by adding a `getAs[T]` method that returns an `Option[T]`.
+
+Every valid function of type `String => T` can be used, implicitly or explicitly, as type converter.
+
+```scala
+import org.scalatra._
+import org.scalatra.extension.__
+
+class PimpingExample extends ScalatraServlet with TypedParamSupport {
+  get("/basic") {
+    // Trivial...
+    val name: Option[String] = params.getAs[String]("name")
+    // Slightly less trivial...
+    val age = params.getAs[Int]("age")  // returns an Option[Int]
+    // Date formats are handled differently
+    val birthDate = params.getAs[Date]("birthdate" -> "MM/dd/yyyy") // Option[Date]
+    //  The same holds for multiParams
+    val codes = multiParams.getAs[Int]("codes") // returns an Option[Seq[Int]]
+  }
+}
+```
+
+## Command objects support
+
+TODO write an example
+
 
 ## Product to Json Support
 
