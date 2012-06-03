@@ -53,6 +53,31 @@ class ScalatraExample extends ScalatraServlet with ProductToJsonSupport {
 }
 ```
 
+## Scalate Rendering Support
+
+Including this trait will give you a 'render' function. This allows you to pass in parameters to set on your Scalate templates. It sets (hopefully) sensible defaults, leaving less mutable state (on the response instance) in your controllers.
+
+```scala
+import org.scalatra._
+import org.scalatra.extension._
+
+class ScalatraExample extends ScalatraServlet with ScalateRenderSupport {
+    
+    override val templateBaseDirectory = "/WEB-INF/scalate/views" //optional, default "/WEB-INF/scalate/templates"
+    override val scalateExtension = "jade" //optional, default "ssp"
+    
+    get("/") {
+        // renders file "/WEB-INF/scalate/views/bar.jade" with given params in view
+        // as text/html, with cache headers indicating to cache for one minute
+        render(file = "bar",
+            params = Map("foo" -> "bar"), // optional, default 'Map()'
+            responseContentType = "text/html", // optional, default 'text/html'
+            cacheMaxAge = oneMinute, // optional, default 0
+            statusCode = 200) // optional, default 200
+    }
+}
+```
+
 ## Community
 
 * Mailing list: [scalatra-user](http://groups.google.com/scalatra-user)
