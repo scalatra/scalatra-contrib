@@ -27,7 +27,7 @@ object ScalatraContribBuild extends Build {
     id = "scalatra-contrib",
     base = file("."),
     settings = scalatraContribSettings ++ Unidoc.settings,
-    aggregate = Seq(commonUtilites, validations)
+    aggregate = Seq(commonUtilites, validations, scalateSupport)
   )
 
   lazy val commonUtilites = Project(
@@ -36,6 +36,15 @@ object ScalatraContribBuild extends Build {
     settings = scalatraContribSettings ++ Seq(
       libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalatraModule("scalatra-lift-json"), scalaz, slf4jSimple % "test", scalatraModule("scalatra-specs2") % "test")),
       description := "Common utilities for contrib modules"
+    )
+  )
+
+  lazy val scalateSupport = Project(
+    id = "contrib-scalate",
+    base = file("scalate"),
+    settings = scalatraContribSettings ++ Seq(
+      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalatraModule("scalatra-scalate"), scalatraModule("scalatra-specs2") % "test")),
+      description := "Scalate utilities for contrib modules"
     )
   )
 
@@ -173,6 +182,11 @@ object ScalatraContribBuild extends Build {
               <id>jlarmstrong</id>
               <name>Jared Armstrong</name>
               <url>http://www.jaredarmstrong.name/</url>
+            </developer>
+            <developer>
+              <id>robb1e</id>
+              <name>Robbie Clutton</name>
+              <url>http://blog.iclutton.com/</url>
             </developer>
           </developers>
       )
