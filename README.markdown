@@ -1,42 +1,29 @@
 Scalatra is a tiny, [Sinatra](http://www.sinatrarb.com/)-like web framework for
-[Scala](http://www.scala-lang.org/).
+[Scala](http://www.scala-lang.org/). Here are some contributed extensions to the library.
 
-## Example
+## Scalatra Documentation
+
+If you're new to Scalatra, check out [The Scalatra Book](http://www.scalatra.org/stable/book/) for more.
+
+# Contribs
+
+## Params
+
+## Product to Json Support
+
+Including this trait will automatically render any Product (case class) to a JSON object. It uses the default formatters provided by Lift JSON library that is included in Scalatra. This keeps your controller class free of content negotiation if you are building an API, so you can focus on the business logic.
 
 ```scala
 import org.scalatra._
+import org.scalatra.extension.__
 
-class ScalatraExample extends ScalatraServlet {
+case class Foo(bar: String)
+
+class ScalatraExample extends ScalatraServlet with ProductToJsonSupport {
   get("/") {
-    <h1>Hello, world!</h1>
+	Foo("baz")
   }
 }
-```
-
-## Documentation
-
-Please see [The Scalatra Book](http://www.scalatra.org/stable/book/) for more.
-
-The [old readme](https://github.com/scalatra/scalatra/tree/scalatra_2.9.0-1-2.0.0.RC1/README.markdown) 
-is deprecated in favor of the book, but may still be more advanced in a few 
-subjects.  If you find one, please [let us know](http://github.com/scalatra/scalatra-book/issues).
-
-## Latest version 
-
-The latest version of Scalatra is `2.0.2`, and is published to [Maven Central](http://repo1.maven.org/maven2/org/scalatra).
-
-```scala
-libraryDependencies += "org.scalatra" %% "scalatra" % "2.0.3"
-```
-
-### Development version
-
-The develop branch is published as `2.1.0-SNAPSHOT` to [OSSRH](http://oss.sonatype.org/content/repositories/snapshots/org/scalatra).
-
-```scala
-resolvers += "Sonatype Nexus Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
-
-libraryDependencies += "org.scalatra" %% "scalatra" % "2.1.0-SNAPSHOT"
 ```
 
 ## Community
