@@ -188,6 +188,11 @@ object ScalatraContribBuild extends Build {
               <name>Robbie Clutton</name>
               <url>http://blog.iclutton.com/</url>
             </developer>
+            <developer>
+              <id>m20o</id>
+              <name>Massimiliano Mazzarolo</name>
+              <url>http://m20o.blogspot.it/</url>
+            </developer>
           </developers>
       )
     }
