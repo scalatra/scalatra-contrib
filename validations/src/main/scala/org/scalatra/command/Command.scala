@@ -48,7 +48,7 @@ trait Command extends BindingImplicits {
 
   private[this] var postBindingActions: List[BindingAction] = Nil
 
-  private[command] var bindings: List[Binding[_]] = List.empty
+  private[scalatra] var bindings: List[Binding[_]] = List.empty
 
   /**
    * Create a binding with the given [[mm.scalatra.command.field.Field]].

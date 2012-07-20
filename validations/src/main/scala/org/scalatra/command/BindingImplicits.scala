@@ -12,7 +12,7 @@ import java.util.Date
 trait BindingImplicits extends DefaultImplicitConversions {
 
   private def blankStringConverter(blankAsNull: Boolean): TypeConverter[String] = (s: String) => Option(s) match {
-    case x@Some(value: String) if (!blankAsNull || value.trim().length > 0) => x
+    case x@Some(value: String) if (!blankAsNull || value.trim.nonEmpty) => x
     case _ => None
   }
 
