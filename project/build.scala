@@ -13,14 +13,12 @@ object ScalatraContribBuild extends Build {
   lazy val scalatraContribSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalatra",
     version := "1.0.0-SNAPSHOT",
-    crossScalaVersions := Seq("2.9.1", "2.9.0-1", "2.9.0", "2.8.2", "2.8.1"),
-    scalaVersion <<= (crossScalaVersions) {
-      versions => versions.head
-    },
+    scalaVersion <<= "2.9.1",
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     javacOptions ++= Seq("-target", "1.6", "-source", "1.6"),
     manifestSetting,
     publishSetting,
+    crossPaths := false,
     resolvers += ScalaToolsSnapshots
   ) ++ mavenCentralFrouFrou
 
