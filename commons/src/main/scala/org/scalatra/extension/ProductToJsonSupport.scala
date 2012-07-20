@@ -1,4 +1,5 @@
-package org.scalatra.extension
+package org.scalatra
+package extension
 
 import org.scalatra._
 
@@ -7,7 +8,7 @@ import net.liftweb.json._
 import net.liftweb.json.JsonAST.{ JInt, JValue }
 import net.liftweb.json.Printer._
 
-trait ProductToJsonSupport extends ScalatraKernel {
+trait ProductToJsonSupport extends ScalatraBase {
 
   override protected def renderPipeline = ({
     case p: Product => {

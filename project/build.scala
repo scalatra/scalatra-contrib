@@ -18,6 +18,7 @@ object ScalatraContribBuild extends Build {
       versions => versions.head
     },
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
+    javacOptions ++= Seq("-target", "1.6", "-source", "1.6"),
     manifestSetting,
     publishSetting,
     resolvers += ScalaToolsSnapshots
