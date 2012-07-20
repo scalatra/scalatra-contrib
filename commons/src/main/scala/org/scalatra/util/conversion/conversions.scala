@@ -4,15 +4,6 @@ import java.util.Date
 import java.text.{DateFormat, SimpleDateFormat}
 import org.scalatra.util.Catch
 
-/**
- * Type converter type class.
- */
-
-object `package` {
-
-  type TypeConverter[T] = (String) => Option[T]
-
-}
 
 /**
  * Support types and implicits for [[mm.scalatra.common.conversions.TypeConverter]].
@@ -36,6 +27,7 @@ trait TypeConverterSupport {
     case _ => None
   }
 }
+
 
 /**
  * Implicit TypeConverter values for value types and some factory method for
