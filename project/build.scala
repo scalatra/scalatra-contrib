@@ -52,6 +52,10 @@ object ScalatraContribBuild extends Build {
     base = file("validations"),
     settings = scalatraContribSettings ++ Seq(
       libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test", scalatraModule("scalatra-specs2") % "test")),
+      libraryDependencies ++= Seq(
+        "commons-validator"       % "commons-validator"  % "1.4.0",
+        "io.backchat.inflector"  %% "scala-inflector"    % "1.3.3"
+      ),
       description := "Validation module",
       ivyXML := <dependencies>
         <dependency org="org.eclipse.jetty" name="test-jetty-servlet" rev="8.1.3.v20120416">
