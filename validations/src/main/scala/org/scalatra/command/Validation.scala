@@ -1,8 +1,6 @@
 package org.scalatra
 package command
 
-import scalaz._
-import Scalaz._
 import org.scalatra.util.conversion._
 import scala.util.control.Exception._
 import java.net.URI
@@ -10,6 +8,9 @@ import org.apache.commons.validator.routines.{ UrlValidator, EmailValidator }
 import mojolly.inflector.InflectorImports._
 import scala.util.matching.Regex
 import java.util.Locale.ENGLISH
+import scalaz._
+import Scalaz._
+
 
 object FieldError {
   def apply(message: String, args: Any*) = {
@@ -37,7 +38,7 @@ object `package` {
 
 }
 
-object Validation {
+object Validators {
   trait Validator[TValue] {
     def validate[TResult >: TValue <: TValue](subject: TResult): FieldValidation[TResult]
   }
@@ -50,62 +51,111 @@ object Validation {
     }
   }
 
-  def nonEmptyString(fieldName: String, value: ⇒ String): FieldValidation[String] =
-    new PredicateValidator[String](fieldName, s => s != null && s.trim.nonEmpty, "%s must be present.").validate(value)
+  def nonEmptyString(fieldName: String): Validator[String] =
+    new PredicateValidator[String](fieldName, s => s != null && s.trim.nonEmpty, "%s must be present.")
 
-  def nonEmptyCollection[TResult <: Seq[_]](fieldName: String, value: ⇒ TResult): FieldValidation[TResult] =
-    new PredicateValidator[TResult](fieldName, _.nonEmpty, "%s must not be empty.").validate(value)
+  def nonEmptyCollection[TResult <: Seq[_]](fieldName: String): Validator[TResult] =
+    new PredicateValidator[TResult](fieldName, _.nonEmpty, "%s must not be empty.")
 
-  def validEmail(fieldName: String, value: ⇒ String): FieldValidation[String] =
-    new PredicateValidator[String](fieldName, EmailValidator.getInstance.isValid(_), "%s must be a valid email.").validate(value)
+  def validEmail(fieldName: String): Validator[String] =
+    new PredicateValidator[String](fieldName, EmailValidator.getInstance.isValid(_), "%s must be a valid email.")
 
-  def validAbsoluteUrl(fieldName: String, value: ⇒ String, allowLocalHost: Boolean, schemes: String*) =
-    buildUrlValidator(fieldName, value, true, allowLocalHost, schemes: _*)
+  def validAbsoluteUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*) =
+    buildUrlValidator(fieldName, true, allowLocalHost, schemes: _*)
 
-  def validUrl(fieldName: String, value: ⇒ String, allowLocalHost: Boolean, schemes: String*) =
-    buildUrlValidator(fieldName, value, false, allowLocalHost, schemes: _*)
+  def validUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*) =
+    buildUrlValidator(fieldName, false, allowLocalHost, schemes: _*)
 
-  private def buildUrlValidator(fieldName: String, value: ⇒ String, absolute: Boolean, allowLocalHost: Boolean, schemes: String*): FieldValidation[String] = {
+  def validFormat(fieldName: String, regex: Regex, messageFormat: String = "%s is invalid."): Validator[String] =
+    new PredicateValidator[String](fieldName, regex.findFirstIn(_).isDefined, messageFormat)
+
+  def validConfirmation(fieldName: String, confirmationFieldName: String, confirmationValue: String): Validator[String] =
+    new PredicateValidator[String](
+      fieldName,
+      _ == confirmationValue,
+      "%s must match " + confirmationFieldName.underscore.humanize.toLowerCase(ENGLISH) + ".")
+
+  def greaterThan[T <% Ordered[T]](fieldName: String, min: T): Validator[T] =
+    new PredicateValidator[T](fieldName, _ > min, "%s must be greater than " + min.toString)
+
+  def lessThan[T <% Ordered[T]](fieldName: String, max: T): Validator[T] =
+    new PredicateValidator[T](fieldName, _ < max, "%s must be less than " + max.toString)
+
+  def greaterThanOrEqualTo[T <% Ordered[T]](fieldName: String, min: T): Validator[T] =
+    new PredicateValidator[T](fieldName, _ >= min, "%s must be greater than or equal to " + min.toString)
+
+  def lessThanOrEqualTo[T <% Ordered[T]](fieldName: String, max: T): Validator[T] =
+    new PredicateValidator[T](fieldName, _ <= max, "%s must be less than or equal to " + max.toString)
+
+  def minLength(fieldName: String, min: Int): Validator[String] =
+    new PredicateValidator[String](
+      fieldName, _.size >= min, "%s must be at least " + min.toString + " characters long.")
+
+  def oneOf[TResult](fieldName: String, expected: TResult*): Validator[TResult] =
+    new PredicateValidator[TResult](
+      fieldName, expected.contains, "%s must be one of " + expected.mkString("[", ", ", "]"))
+
+  def enumValue(fieldName: String, enum: Enumeration): Validator[String] =
+    oneOf(fieldName, enum.values.map(_.toString).toSeq: _*)
+
+
+  private def buildUrlValidator(fieldName: String, absolute: Boolean, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
     val validator = (url: String) ⇒ {
       (allCatch opt {
         val u = URI.create(url).normalize()
         !absolute || u.isAbsolute
-      }).isDefined && (!allowLocalHost || UrlValidator.getInstance().isValid(url))
+      }).isDefined && (allowLocalHost || UrlValidator.getInstance().isValid(url))
     }
-    new PredicateValidator[String](fieldName, validator, "%s must be a valid url.").validate(value)
+    new PredicateValidator[String](fieldName, validator, "%s must be a valid url.")
   }
 
+}
+
+object Validation {
+  
+  def nonEmptyString(fieldName: String, value: ⇒ String): FieldValidation[String] =
+    Validators.nonEmptyString(fieldName).validate(value)
+
+  def nonEmptyCollection[TResult <: Seq[_]](fieldName: String, value: ⇒ TResult): FieldValidation[TResult] =
+    Validators.nonEmptyCollection(fieldName).validate(value)
+
+  def validEmail(fieldName: String, value: ⇒ String): FieldValidation[String] =
+    Validators.validEmail(fieldName).validate(value)
+
+  def validAbsoluteUrl(fieldName: String, value: ⇒ String, allowLocalHost: Boolean, schemes: String*) =
+    Validators.validAbsoluteUrl(fieldName, allowLocalHost, schemes:_*).validate(value)
+
+  def validUrl(fieldName: String, value: ⇒ String, allowLocalHost: Boolean, schemes: String*) =
+    Validators.validUrl(fieldName, allowLocalHost, schemes:_*).validate(value)
+
   def validFormat(fieldName: String, value: ⇒ String, regex: Regex, messageFormat: String = "%s is invalid."): FieldValidation[String] =
-    new PredicateValidator[String](fieldName, regex.findFirstIn(_).isDefined, messageFormat).validate(value)
+    Validators.validFormat(fieldName, regex, messageFormat).validate(value)
 
   def validConfirmation(fieldName: String, value: ⇒ String, confirmationFieldName: String, confirmationValue: String): FieldValidation[String] =
-    new PredicateValidator[String](
-      fieldName,
-      _ == confirmationValue,
-      "%s must match " + confirmationFieldName.underscore.humanize.toLowerCase(ENGLISH) + ".").validate(value)
+    Validators.validConfirmation(fieldName, confirmationFieldName, confirmationValue).validate(value)
 
   def greaterThan[T <% Ordered[T]](fieldName: String, value: ⇒ T, min: T): FieldValidation[T] =
-    new PredicateValidator[T](fieldName, _ > min, "%s must be greater than " + min.toString).validate(value)
+    Validators.greaterThan(fieldName, min).validate(value)
 
   def lessThan[T <% Ordered[T]](fieldName: String, value: ⇒ T, max: T): FieldValidation[T] =
-    new PredicateValidator[T](fieldName, _ < max, "%s must be less than " + max.toString).validate(value)
+    Validators.lessThan(fieldName, max).validate(value)
 
   def greaterThanOrEqualTo[T <% Ordered[T]](fieldName: String, value: ⇒ T, min: T): FieldValidation[T] =
-    new PredicateValidator[T](fieldName, _ >= min, "%s must be greater than or equal to " + min.toString).validate(value)
+    Validators.greaterThanOrEqualTo(fieldName, min).validate(value)
 
   def lessThanOrEqualTo[T <% Ordered[T]](fieldName: String, value: ⇒ T, max: T): FieldValidation[T] =
-    new PredicateValidator[T](fieldName, _ <= max, "%s must be less than or equal to " + max.toString).validate(value)
+    Validators.lessThanOrEqualTo(fieldName, max).validate(value)
 
   def minLength(fieldName: String, value: ⇒ String, min: Int): FieldValidation[String] =
-    new PredicateValidator[String](
-      fieldName, _.size >= min, "%s must be at least " + min.toString + " characters long.").validate(value)
+    Validators.minLength(fieldName, min).validate(value)
 
   def oneOf[TResult](fieldName: String, value: ⇒ TResult, expected: TResult*): FieldValidation[TResult] =
-    new PredicateValidator[TResult](
-      fieldName, expected.contains, "%s must be one of " + expected.mkString("[", ", ", "]")).validate(value)
+    Validators.oneOf(fieldName, expected:_*).validate(value)
 
   def enumValue(fieldName: String, value: ⇒ String, enum: Enumeration): FieldValidation[String] =
     oneOf(fieldName, value, enum.values.map(_.toString).toSeq: _*)
+  
+  
 }
 
 /**
@@ -131,7 +181,7 @@ trait ValidatedBinding[T] extends Binding[T]  {
 
 
 class ValidatedBindingDecorator[T](val validator: Validator[T], binding: Binding[T]) extends ValidatedBinding[T] {
-
+  
   lazy val validation = validator(converted)
 
   def name = binding.name
@@ -145,6 +195,64 @@ class ValidatedBindingDecorator[T](val validator: Validator[T], binding: Binding
   override def hashCode() = binding.hashCode()
 
   override def equals(obj: Any) = binding.equals(obj)
+}
+
+trait CommandValidators { self: Command with ValidationSupport =>
+  
+  def nonEmptyString(fieldName: String): Validator[String] = {
+    case s => Validation.nonEmptyString(fieldName, s getOrElse "")
+  }
+
+  def nonEmptyCollection[TResult <: Seq[_]](fieldName: String): Validator[TResult] = {
+    case s => Validation.nonEmptyCollection(fieldName, s getOrElse Nil.asInstanceOf[TResult])
+  }
+
+  def validEmail(fieldName: String): Validator[String] = {
+    case m => Validation.validEmail(fieldName, m getOrElse "")
+  }
+
+  def validAbsoluteUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
+    case value => Validators.validAbsoluteUrl(fieldName, allowLocalHost, schemes:_*).validate(value getOrElse "")
+  }
+
+  def validUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
+    case value => Validators.validUrl(fieldName, allowLocalHost, schemes:_*).validate(value getOrElse "")
+  }
+
+  def validFormat(fieldName: String, regex: Regex, messageFormat: String = "%s is invalid."): Validator[String] = {
+    case value => Validators.validFormat(fieldName, regex, messageFormat).validate(value getOrElse "")
+  }
+
+  def validConfirmation(fieldName: String, confirmationFieldName: String, confirmationValue: String): Validator[String] = {
+    case value => Validators.validConfirmation(fieldName, confirmationFieldName, confirmationValue).validate(value getOrElse "")
+  }
+
+  def greaterThan[T <% Ordered[T]](fieldName: String, min: T): Validator[T] = {
+    case value => Validators.greaterThan(fieldName, min).validate(value getOrElse null.asInstanceOf[T])
+  }
+
+  def lessThan[T <% Ordered[T]](fieldName: String, max: T): Validator[T] = {
+    case value => Validators.lessThan(fieldName, max).validate(value getOrElse  null.asInstanceOf[T])
+  }
+
+  def greaterThanOrEqualTo[T <% Ordered[T]](fieldName: String, min: T): Validator[T] = {
+    case value => Validators.greaterThanOrEqualTo(fieldName, min).validate(value getOrElse  null.asInstanceOf[T])
+  }
+
+  def lessThanOrEqualTo[T <% Ordered[T]](fieldName: String, max: T): Validator[T] = {
+    case value => Validators.lessThanOrEqualTo(fieldName, max).validate(value getOrElse  null.asInstanceOf[T])
+  }
+
+  def minLength(fieldName: String, min: Int): Validator[String] = {
+    case value => Validators.minLength(fieldName, min).validate(value getOrElse  "")
+  }
+
+  def oneOf[TResult](fieldName: String, expected: TResult*): Validator[TResult] = {
+    case value => Validators.oneOf(fieldName, expected:_*).validate(value getOrElse Nil.asInstanceOf[TResult])
+  }
+
+  def enumValue(fieldName: String, enum: Enumeration): Validator[String] =
+    oneOf(fieldName, enum.values.map(_.toString).toSeq: _*)
 }
 
 trait ValidationSupport extends Validations {
@@ -189,6 +297,62 @@ trait ValidationSupport extends Validations {
       command.bindings = command.bindings :+ newBinding
       newBinding
     }
+    
+      
+    def nonEmptyString: Validator[String] = {
+      case s => Validation.nonEmptyString(binding.name, s getOrElse "")
+    }
+  
+    def nonEmptyCollection[TResult <: Seq[_]]: Validator[TResult] = {
+      case s => Validation.nonEmptyCollection(binding.name, s getOrElse Nil.asInstanceOf[TResult])
+    }
+  
+    def validEmail: Validator[String] = {
+      case m => Validation.validEmail(binding.name, m getOrElse "")
+    }
+  
+    def validAbsoluteUrl(allowLocalHost: Boolean, schemes: String*): Validator[String] = {
+      case value => Validators.validAbsoluteUrl(binding.name, allowLocalHost, schemes:_*).validate(value getOrElse "")
+    }
+  
+    def validUrl(allowLocalHost: Boolean, schemes: String*): Validator[String] = {
+      case value => Validators.validUrl(binding.name, allowLocalHost, schemes:_*).validate(value getOrElse "")
+    }
+  
+    def validFormat(regex: Regex, messageFormat: String = "%s is invalid."): Validator[String] = {
+      case value => Validators.validFormat(binding.name, regex, messageFormat).validate(value getOrElse "")
+    }
+  
+    def validConfirmation(confirmationFieldName: String, confirmationValue: String): Validator[String] = {
+      case value => Validators.validConfirmation(binding.name, confirmationFieldName, confirmationValue).validate(value getOrElse "")
+    }
+  
+    def greaterThan[T <% Ordered[T]](min: T): Validator[T] = {
+      case value => Validators.greaterThan(binding.name, min).validate(value getOrElse null.asInstanceOf[T])
+    }
+  
+    def lessThan[T <% Ordered[T]](max: T): Validator[T] = {
+      case value => Validators.lessThan(binding.name, max).validate(value getOrElse  null.asInstanceOf[T])
+    }
+  
+    def greaterThanOrEqualTo[T <% Ordered[T]](min: T): Validator[T] = {
+      case value => Validators.greaterThanOrEqualTo(binding.name, min).validate(value getOrElse  null.asInstanceOf[T])
+    }
+  
+    def lessThanOrEqualTo[T <% Ordered[T]](max: T): Validator[T] = {
+      case value => Validators.lessThanOrEqualTo(binding.name, max).validate(value getOrElse  null.asInstanceOf[T])
+    }
+  
+    def minLength(min: Int): Validator[String] = {
+      case value => Validators.minLength(binding.name, min).validate(value getOrElse  "")
+    }
+  
+    def oneOf[TResult](expected: TResult*): Validator[TResult] = {
+      case value => Validators.oneOf(binding.name, expected:_*).validate(value getOrElse Nil.asInstanceOf[TResult])
+    }
+  
+    def enumValue(enum: Enumeration): Validator[String] = oneOf(enum.values.map(_.toString).toSeq: _*)
+    
 
   }
 
@@ -196,7 +360,6 @@ trait ValidationSupport extends Validations {
    * Implicit enhancement for [[mm.scalatra.command.Binding]]
    */
   implicit def binding2Validated[T](binding: Binding[T]) = new BindingValidationSupport[T](this, binding)
-
 
   /**
    * Perform command as afterBinding task.

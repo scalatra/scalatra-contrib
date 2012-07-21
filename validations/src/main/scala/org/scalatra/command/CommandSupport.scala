@@ -20,7 +20,7 @@ trait CommandSupport {
   implicit def bindingValue[T](b: Binding[T]): Option[T] = b.converted
 
   /**
-   * Create and bind a [[mm.scalatra.command.Command]] of the given type with the current Scalatra params.
+   * Create and bind a [[org.scalatra.command.Command]] of the given type with the current Scalatra params.
    *
    * For every command type, creation and binding is performed only once and then stored into
    * a request attribute.
