@@ -80,31 +80,46 @@ trait Command extends BindingImplicits {
    * Also execute any ''before'' and ''after'' action eventually registered.
    *
    */
-  final def doBinding(params: Params) = {
-    doBeforeBindingActions
-    for (binding <- bindings;
-         value <- params.get(binding.name)
-    ) yield binding(value)
-    doAfterBindingActions
-    this
+  final def doBinding(data: JValue)(implicit formats: Formats): Command = {
+    doBinding(json = data, jsonOnly = true)
   }
 
-  final def doBinding(data: JValue)(implicit formats: Formats) = {
+  final def doBinding(params: Params = Map.empty, json: JValue = JNothing, paramsOnly: Boolean = false, jsonOnly: Boolean = false)(implicit formats: Formats) = {
     doBeforeBindingActions
     bindings foreach { binding =>
-      val d = (data \ binding.name)
-      d match {
-        case JNothing => binding(null)
-        case JString(s) => binding(s)
-        case jv => binding(compact(render(jv)))
+      this match {
+        case d: ForceFromParams if d.namesToForce.contains(binding.name) => bindFromParams(params, binding)
+        case _ if paramsOnly => bindFromParams(params, binding)
+        case _ if json == JNothing && !jsonOnly => bindFromParams(params, binding)
+        case _ => bindFromJson(json, binding)
       }
+
     }
     doAfterBindingActions
     this
   }
 
+  private def bindFromParams(params: Params, binding: Binding[_]) = {
+    params.get(binding.name) foreach binding.apply
+  }
+
+  private def bindFromJson(data: JValue, binding: Binding[_]) = {
+    val d = (data \ binding.name)
+    d match {
+      case JNothing =>
+      case JString(s) => binding(s)
+      case jv => binding(compact(render(jv)))
+    }
+  }
+
+
   private def doBeforeBindingActions = preBindingActions.foreach(_.apply())
 
   private def doAfterBindingActions = postBindingActions.foreach(_.apply())
+}
+
+trait ForceFromParams { self: Command =>
+
+  def namesToForce: Set[String]
 }
 
