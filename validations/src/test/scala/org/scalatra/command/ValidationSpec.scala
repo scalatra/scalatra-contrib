@@ -2,6 +2,7 @@ package org.scalatra.command
 
 import org.specs2.mutable.Specification
 import scalaz.Failure
+import net.liftweb.json.{DefaultFormats, Formats}
 
 class WithValidation extends WithBinding with ValidationSupport {
 
@@ -17,7 +18,7 @@ class WithValidation extends WithBinding with ValidationSupport {
 
 
 class ValidationSupportSpec extends Specification {
-
+  implicit val formats: Formats = DefaultFormats
   "The 'ValidationSupport' trait" should {
 
     "do normal binding within 'doBinding'" in {

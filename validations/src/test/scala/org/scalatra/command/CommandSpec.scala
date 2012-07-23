@@ -3,6 +3,8 @@ package command
 
 import org.specs2.mutable.Specification
 import java.lang.System
+import net.liftweb.json.{Formats, DefaultFormats}
+import liftjson.LiftJsonSupport
 
 
 trait BindingTemplate {
@@ -29,6 +31,7 @@ class WithBinding extends Command with BindingTemplate {
 
 class CommandSpec extends Specification {
 
+  implicit val formats: Formats = DefaultFormats
   "The 'Command' trait" should {
 
     "bind and register a 'Binding[T]' instance" in {
@@ -116,8 +119,8 @@ class CommandSample extends Command {
 
 class CommandSupportSpec extends Specification {
 
-  class ScalatraPage extends ScalatraFilter with CommandSupport
-
+  class ScalatraPage extends ScalatraFilter with LiftJsonSupport with CommandSupport
+  implicit val formats: Formats = DefaultFormats
   "The CommandSupport trait" should {
 
     "provide a convention for request keys with commandRequestKey[T]" in {
