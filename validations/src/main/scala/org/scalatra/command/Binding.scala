@@ -3,7 +3,10 @@ package org.scalatra.command
 import org.scalatra.util.conversion._
 
 trait Binding[T] {
-  
+
+  type ValueType = T
+
+
   def name: String
   
   def original: String

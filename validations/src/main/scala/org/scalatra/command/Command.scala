@@ -1,5 +1,6 @@
 package org.scalatra.command
 
+import net.liftweb.json._
 
 /**
  * Trait that identifies a ''Command object'', i.e. a Scala class instance which fields are bound to external parameters
@@ -53,7 +54,7 @@ trait Command extends BindingImplicits {
   /**
    * Create a binding with the given [[mm.scalatra.command.field.Field]].
    */
-  def bind[T](field: Binding[T]): Binding[T] = {
+  def bind[T: Manifest](field: Binding[T]): Binding[T] = {
     bindings = bindings :+ field
     field
   }
@@ -84,6 +85,20 @@ trait Command extends BindingImplicits {
     for (binding <- bindings;
          value <- params.get(binding.name)
     ) yield binding(value)
+    doAfterBindingActions
+    this
+  }
+
+  final def doBinding(data: JValue)(implicit formats: Formats) = {
+    doBeforeBindingActions
+    bindings foreach { binding =>
+      val d = (data \ binding.name)
+      d match {
+        case JNothing => binding(null)
+        case JString(s) => binding(s)
+        case jv => binding(compact(render(jv)))
+      }
+    }
     doAfterBindingActions
     this
   }
