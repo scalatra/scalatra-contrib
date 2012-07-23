@@ -29,7 +29,7 @@ trait CommandSupport {
     commandOption[T].getOrElse {
       val newCommand = manifest[T].erasure.newInstance.asInstanceOf[T]
       newCommand.doBinding(params)
-      requestProxy.update(commandRequestKey[T], newCommand)
+      request.update(commandRequestKey[T], newCommand)
       newCommand
     }
   }

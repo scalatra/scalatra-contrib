@@ -74,7 +74,7 @@ trait Command extends BindingImplicits {
 
   /**
    * Bind all registered [[mm.scalatra.command.Binding]] with values
-   * taken from Scalatra [[org.scalatra.ScalatraKernel.params]].
+   * taken from Scalatra [[org.scalatra.ScalatraBase.params]].
    *
    * Also execute any ''before'' and ''after'' action eventually registered.
    *

@@ -199,59 +199,59 @@ class ValidatedBindingDecorator[T](val validator: Validator[T], binding: Binding
 
 trait CommandValidators { self: Command with ValidationSupport =>
   
-  def nonEmptyString(fieldName: String): Validator[String] = {
+  protected def nonEmptyString(fieldName: String): Validator[String] = {
     case s => Validation.nonEmptyString(fieldName, s getOrElse "")
   }
 
-  def nonEmptyCollection[TResult <: Seq[_]](fieldName: String): Validator[TResult] = {
+  protected def nonEmptyCollection[TResult <: Seq[_]](fieldName: String): Validator[TResult] = {
     case s => Validation.nonEmptyCollection(fieldName, s getOrElse Nil.asInstanceOf[TResult])
   }
 
-  def validEmail(fieldName: String): Validator[String] = {
+  protected def validEmail(fieldName: String): Validator[String] = {
     case m => Validation.validEmail(fieldName, m getOrElse "")
   }
 
-  def validAbsoluteUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
+  protected def validAbsoluteUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
     case value => Validators.validAbsoluteUrl(fieldName, allowLocalHost, schemes:_*).validate(value getOrElse "")
   }
 
-  def validUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
+  protected def validUrl(fieldName: String, allowLocalHost: Boolean, schemes: String*): Validator[String] = {
     case value => Validators.validUrl(fieldName, allowLocalHost, schemes:_*).validate(value getOrElse "")
   }
 
-  def validFormat(fieldName: String, regex: Regex, messageFormat: String = "%s is invalid."): Validator[String] = {
+  protected def validFormat(fieldName: String, regex: Regex, messageFormat: String = "%s is invalid."): Validator[String] = {
     case value => Validators.validFormat(fieldName, regex, messageFormat).validate(value getOrElse "")
   }
 
-  def validConfirmation(fieldName: String, confirmationFieldName: String, confirmationValue: String): Validator[String] = {
+  protected def validConfirmation(fieldName: String, confirmationFieldName: String, confirmationValue: String): Validator[String] = {
     case value => Validators.validConfirmation(fieldName, confirmationFieldName, confirmationValue).validate(value getOrElse "")
   }
 
-  def greaterThan[T <% Ordered[T]](fieldName: String, min: T): Validator[T] = {
+  protected def greaterThan[T <% Ordered[T]](fieldName: String, min: T): Validator[T] = {
     case value => Validators.greaterThan(fieldName, min).validate(value getOrElse null.asInstanceOf[T])
   }
 
-  def lessThan[T <% Ordered[T]](fieldName: String, max: T): Validator[T] = {
+  protected def lessThan[T <% Ordered[T]](fieldName: String, max: T): Validator[T] = {
     case value => Validators.lessThan(fieldName, max).validate(value getOrElse  null.asInstanceOf[T])
   }
 
-  def greaterThanOrEqualTo[T <% Ordered[T]](fieldName: String, min: T): Validator[T] = {
+  protected def greaterThanOrEqualTo[T <% Ordered[T]](fieldName: String, min: T): Validator[T] = {
     case value => Validators.greaterThanOrEqualTo(fieldName, min).validate(value getOrElse  null.asInstanceOf[T])
   }
 
-  def lessThanOrEqualTo[T <% Ordered[T]](fieldName: String, max: T): Validator[T] = {
+  protected def lessThanOrEqualTo[T <% Ordered[T]](fieldName: String, max: T): Validator[T] = {
     case value => Validators.lessThanOrEqualTo(fieldName, max).validate(value getOrElse  null.asInstanceOf[T])
   }
 
-  def minLength(fieldName: String, min: Int): Validator[String] = {
+  protected def minLength(fieldName: String, min: Int): Validator[String] = {
     case value => Validators.minLength(fieldName, min).validate(value getOrElse  "")
   }
 
-  def oneOf[TResult](fieldName: String, expected: TResult*): Validator[TResult] = {
+  protected def oneOf[TResult](fieldName: String, expected: TResult*): Validator[TResult] = {
     case value => Validators.oneOf(fieldName, expected:_*).validate(value getOrElse Nil.asInstanceOf[TResult])
   }
 
-  def enumValue(fieldName: String, enum: Enumeration): Validator[String] =
+  protected def enumValue(fieldName: String, enum: Enumeration): Validator[String] =
     oneOf(fieldName, enum.values.map(_.toString).toSeq: _*)
 }
 
@@ -297,6 +297,8 @@ trait ValidationSupport extends Validations {
       command.bindings = command.bindings :+ newBinding
       newBinding
     }
+
+    def withBinding(bf: Binding[T] => Binding[T]) = bf(binding)
     
       
     def nonEmptyString: Validator[String] = {
