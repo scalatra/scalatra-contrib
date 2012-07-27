@@ -8,11 +8,11 @@ object ScalatraContribBuild extends Build {
   import Dependencies._
   import Resolvers._
 
-  val scalatraVersion = "2.1.0-SNAPSHOT"
+  val scalatraVersion = "2.1.0-RC1"
 
   lazy val scalatraContribSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalatra",
-    version := "1.0.5-SNAPSHOT",
+    version := "1.0.5-RC1",
     scalaVersion := "2.9.1",
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     javacOptions ++= Seq("-target", "1.6", "-source", "1.6"),
