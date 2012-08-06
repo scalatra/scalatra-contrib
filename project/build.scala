@@ -13,19 +13,19 @@ object ScalatraContribBuild extends Build {
   lazy val scalatraContribSettings = Defaults.defaultSettings ++ Seq(
     organization := "org.scalatra",
     version := "1.0.5-RC1",
-    scalaVersion := "2.9.1",
+    scalaVersion := "2.9.2",
     scalacOptions ++= Seq("-unchecked", "-deprecation"),
     javacOptions ++= Seq("-target", "1.6", "-source", "1.6"),
     manifestSetting,
     publishSetting,
-    crossPaths := false,
-    resolvers += ScalaToolsSnapshots
+    resolvers += sonatypeNexusSnapshots,
+    crossPaths := false
   ) ++ mavenCentralFrouFrou
 
   lazy val scalatraContribProject = Project(
     id = "scalatra-contrib",
     base = file("."),
-    settings = scalatraContribSettings ++ Unidoc.settings,
+    settings = scalatraContribSettings ++ Unidoc.unidocSettings,
     aggregate = Seq(commonUtilites, validations, scalateSupport)
   )
 
@@ -85,14 +85,14 @@ object ScalatraContribBuild extends Build {
     def scalatest(scalaVersion: String) = {
       val libVersion = scalaVersion match {
         case x if x startsWith "2.8." => "1.5.1"
-        case _ => "1.6.1"
+        case _ => "1.8"
       }
       "org.scalatest" %% "scalatest" % libVersion
     }
 
     def specs(scalaVersion: String) = {
       val libVersion = scalaVersion match {
-        case "2.9.1" => "1.6.9"
+        case "2.9.1" | "2.9.2" => "1.6.9"
         case _ => "1.6.8"
       }
       "org.scala-tools.testing" %% "specs" % libVersion
@@ -102,7 +102,7 @@ object ScalatraContribBuild extends Build {
       val libVersion = scalaVersion match {
         case x if x startsWith "2.8." => "1.5"
         case "2.9.0" => "1.5" // https://github.com/etorreborre/specs2/issues/33
-        case _ => "1.7.1"
+        case _ => "1.12"
       }
       "org.specs2" %% "specs2" % libVersion
     }
