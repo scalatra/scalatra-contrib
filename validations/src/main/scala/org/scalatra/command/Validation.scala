@@ -45,7 +45,7 @@ object Validators {
 
   class PredicateValidator[TValue](fieldName: String, isValid: TValue ⇒ Boolean, messageFormat: String)
       extends Validator[TValue] {
-    override def validate[TResult >: TValue <: TValue](value: TResult): FieldValidation[TResult] = {
+    def validate[TResult >: TValue <: TValue](value: TResult): FieldValidation[TResult] = {
       if (isValid(value)) value.success
       else ValidationError(messageFormat.format(fieldName.humanize), fieldName.underscore).fail[TResult]
     }

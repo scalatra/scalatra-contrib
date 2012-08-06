@@ -80,11 +80,11 @@ trait Command extends BindingImplicits {
    * Also execute any ''before'' and ''after'' action eventually registered.
    *
    */
-  final def doBinding(data: JValue)(implicit formats: Formats): Command = {
+  final def doBinding(data: JValue)(implicit formats: Formats): this.type = {
     doBinding(json = data, jsonOnly = true)
   }
 
-  final def doBinding(params: Params = Map.empty, json: JValue = JNothing, paramsOnly: Boolean = false, jsonOnly: Boolean = false)(implicit formats: Formats) = {
+  final def doBinding(params: Params = Map.empty, json: JValue = JNothing, paramsOnly: Boolean = false, jsonOnly: Boolean = false)(implicit formats: Formats): this.type = {
     doBeforeBindingActions
     bindings foreach { binding =>
       this match {
@@ -116,6 +116,8 @@ trait Command extends BindingImplicits {
   private def doBeforeBindingActions = preBindingActions.foreach(_.apply())
 
   private def doAfterBindingActions = postBindingActions.foreach(_.apply())
+
+  override def toString: String = "%s(bindings: [%s])".format(getClass.getName, bindings.mkString(", "))
 }
 
 trait ForceFromParams { self: Command =>

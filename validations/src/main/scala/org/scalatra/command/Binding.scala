@@ -15,6 +15,8 @@ trait Binding[T] {
   
   def apply(value: String)
 
+  override def toString() = "Binding(name: %s, original: %s, converted: %s)".format(name, original, converted)
+
 }
 
 class BasicBinding[T](val name: String)(implicit val conversion: TypeConverter[T]) extends Binding[T] {
