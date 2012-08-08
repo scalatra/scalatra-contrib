@@ -56,13 +56,7 @@ object ScalatraContribBuild extends Build {
         "commons-validator"       % "commons-validator"  % "1.4.0",
         "io.backchat.inflector"  %% "scala-inflector"    % "1.3.3"
       ),
-      description := "Validation module",
-      ivyXML := <dependencies>
-        <dependency org="org.eclipse.jetty" name="test-jetty-servlet" rev="8.1.3.v20120416">
-            <exclude org="org.eclipse.jetty.orbit"/>
-        </dependency>
-      </dependencies>
-    )
+      description := "Validation module")
   ) dependsOn (commonUtilites)
 
   object Dependencies {
