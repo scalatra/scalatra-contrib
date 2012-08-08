@@ -18,6 +18,7 @@ object ScalatraContribBuild extends Build {
     javacOptions ++= Seq("-target", "1.6", "-source", "1.6"),
     manifestSetting,
     publishSetting,
+    classpathTypes ~= (_ + "orbit"),
     resolvers ++= Seq(sonatypeNexusSnapshots, sonatypeNexusReleases),
     crossPaths := false
   ) ++ mavenCentralFrouFrou
@@ -56,13 +57,14 @@ object ScalatraContribBuild extends Build {
         "commons-validator"       % "commons-validator"  % "1.4.0",
         "io.backchat.inflector"  %% "scala-inflector"    % "1.3.3"
       ),
-      description := "Validation module")
+      description := "Validation module"
+    )
   ) dependsOn (commonUtilites)
 
   object Dependencies {
 
     def scalatraModule(moduleName: String) = {
-      "org.scalatra" % moduleName % scalatraVersion
+      "org.scalatra" % moduleName % scalatraVersion //exclude("org.eclipse.jetty.orbit", "javax.servlet")
     }
 
     def grizzledSlf4j(scalaVersion: String) = {
@@ -101,7 +103,7 @@ object ScalatraContribBuild extends Build {
       "org.specs2" %% "specs2" % libVersion
     }
 
-    val servletApi = "javax.servlet" % "javax.servlet-api" % "3.0.1" % "provided"
+    val servletApi = "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "provided;test" artifacts (Artifact("javax.servlet", "jar", "jar"))
 
     val slf4jSimple = "org.slf4j" % "slf4j-simple" % "1.6.4"
 
