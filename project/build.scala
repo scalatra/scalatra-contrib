@@ -27,17 +27,17 @@ object ScalatraContribBuild extends Build {
     id = "scalatra-contrib",
     base = file("."),
     settings = scalatraContribSettings ++ Unidoc.unidocSettings,
-    aggregate = Seq(commonUtilites, validations, scalateSupport)
+    aggregate = Seq(validations, scalateSupport)
   )
-
-  lazy val commonUtilites = Project(
-    id = "contrib-commons",
-    base = file("commons"),
-    settings = scalatraContribSettings ++ Seq(
-      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalatraModule("scalatra-lift-json"), scalaz, slf4jSimple % "test", scalatraModule("scalatra-specs2") % "test")),
-      description := "Common utilities for contrib modules"
-    )
-  )
+//
+//  lazy val commonUtilites = Project(
+//    id = "contrib-commons",
+//    base = file("commons"),
+//    settings = scalatraContribSettings ++ Seq(
+//      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalatraModule("scalatra-lift-json"), scalaz, slf4jSimple % "test", scalatraModule("scalatra-specs2") % "test")),
+//      description := "Common utilities for contrib modules"
+//    )
+//  )
 
   lazy val scalateSupport = Project(
     id = "contrib-scalate",
@@ -52,14 +52,14 @@ object ScalatraContribBuild extends Build {
     id = "contrib-validation",
     base = file("validations"),
     settings = scalatraContribSettings ++ Seq(
-      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test", scalatraModule("scalatra-specs2") % "test")),
+      libraryDependencies <++= scalaVersion(sv => Seq(scalatraModule("scalatra"), scalatraModule("scalatra-lift-json"), servletApi, scalaz, slf4jSimple % "test", specs2(sv) % "test", scalatraModule("scalatra-specs2") % "test")),
       libraryDependencies ++= Seq(
         "commons-validator"       % "commons-validator"  % "1.4.0",
         "io.backchat.inflector"  %% "scala-inflector"    % "1.3.3"
       ),
       description := "Validation module"
     )
-  ) dependsOn (commonUtilites)
+  )
 
   object Dependencies {
 
